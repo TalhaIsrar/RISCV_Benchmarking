@@ -1,5 +1,7 @@
 #include <stdint.h>
 
+// CORE IS ONLT RV32I so custom mul mod div implementation
+
 // ------------------------
 // Software multiply/divide (RV32I-friendly)
 // ------------------------
@@ -61,14 +63,16 @@ int __mulsi3(int a, int b)
 }
 
 // ------------------------
-// UART functions
+// UART functions - Used for logging
 // ------------------------
-void uart_putc(char c)
+void uart_putc(char c) // Write single character
 {
-    volatile char *uart_tx = (char *)0xFFFFFFFC;
+    // volatile pointer so compiler does not optimze away memory access
+    volatile char *uart_tx = (char *)0xFFFFFFFC; //UART Mapped at this address
     *uart_tx = c;
 }
 
+// Writes null terminated string to UART
 void uart_puts(const char *str)
 {
     while (*str)
@@ -77,19 +81,22 @@ void uart_puts(const char *str)
     }
 }
 
+// Prints 32 bit value in hexadecimal so input is HEXADECIMAL and output is HEX string
 void uart_puthex(uint32_t val)
 {
     uart_puts("0x");
 
-    int shift = 28;
-    for (int i = 0; i < 8; i++)
+    int shift = 28; // Shift by 28 to have only 4 bits
+    for (int i = 0; i < 8; i++) // Does 8 times b/c 8*2 = 32
     {
         uint32_t nibble = (val >> shift) & 0xF;
-        uart_putc(nibble < 10 ? ('0' + nibble) : ('A' + nibble - 10));
+        uart_putc(nibble < 10 ? ('0' + nibble) : ('A' + nibble - 10)); // Convert to ASCII
         shift -= 4;
     }
 }
 
+// Print unsigned int
+// Use shift and mod by 10 to convert int to ascii int
 void uart_putint(uint32_t val)
 {
     char buf[11]; // max 10 digits + null
@@ -114,6 +121,7 @@ void uart_putint(uint32_t val)
     }
 }
 
+// Print string + hex value + newline
 void uart_putsi(const char *str, uint32_t val)
 {
     uart_puts(str);
@@ -123,9 +131,13 @@ void uart_putsi(const char *str, uint32_t val)
 // ------------------------
 // Benchmark globals & helpers
 // ------------------------
+// Global dummy variable to prevent compiler from optimizaing away loops
 volatile uint32_t sink = 0;
 
-static inline uint32_t xorshift32(uint32_t *state)
+// psedo random number generator
+// static because only visible in this C file
+// inline b/c compiler may insert code directly where called to avoid function call overhead to reduce cycles in benchmarking
+static inline uint32_t xorshift32(uint32_t *state) 
 {
     uint32_t x = *state;
     x ^= x << 13;
@@ -138,6 +150,7 @@ static inline uint32_t xorshift32(uint32_t *state)
 // ------------------------
 // Branch pattern functions
 // ------------------------
+
 void always_taken(uint32_t loops)
 {
     volatile int cond = 1;
@@ -169,10 +182,11 @@ void alternating(uint32_t loops)
     }
 }
 
+// Creates a pattern where for half loop is taken and other half not taken
 void periodic(uint32_t loops, uint32_t period)
 {
     uint32_t state = 0;
-    uint32_t half = period >> 1;
+    uint32_t half = period >> 1; // Divide by 2
     for (uint32_t i = 0; i < loops; i++)
     {
         if (state < half)
@@ -271,10 +285,13 @@ int main(void)
 
     uart_puts("Branch predictor test (RV32I)\n");
     uint32_t wrongBranches0, controlXfer0, timer0, wrongBranches1, controlXfer1, N_instructions0, N_instructions1, timer1, User_Cycles;
-    asm volatile("csrr %0, 0x80" : "=r"(wrongBranches0));
-    asm volatile("csrr %0, 0x81" : "=r"(controlXfer0));
-    asm volatile("csrr %0, 0x82" : "=r"(N_instructions0));
-    asm volatile("csrr %0, 0x83" : "=r"(timer0));
+    
+    // asm is to run assembly code
+    // These lines read custom CSR in the CPU
+    asm volatile("csrr %0, 0x80" : "=r"(wrongBranches0)); // Wrong branch predictions
+    asm volatile("csrr %0, 0x81" : "=r"(controlXfer0)); // Number of control transfers
+    asm volatile("csrr %0, 0x82" : "=r"(N_instructions0)); // Instructions executed
+    asm volatile("csrr %0, 0x83" : "=r"(timer0)); // Cycle count
     always_taken(loops);
 
     always_not_taken(loops);
@@ -299,17 +316,18 @@ int main(void)
 
     uint32_t fact_res = factorial_recursive(__divsi3(loops, 20));
 
+    // Read back the CSRs to measure difference
     asm volatile("csrr %0, 0x80" : "=r"(wrongBranches1));
     asm volatile("csrr %0, 0x81" : "=r"(controlXfer1));
     asm volatile("csrr %0, 0x82" : "=r"(N_instructions1));
     asm volatile("csrr %0, 0x83" : "=r"(timer1));
     // Differences
-    User_Cycles = timer1 - timer0;
-    uint32_t wrongBranches = wrongBranches1 - wrongBranches0;
-    uint32_t controlXfers = controlXfer1 - controlXfer0;
-    uint32_t instructions = N_instructions1 - N_instructions0;
+    User_Cycles = timer1 - timer0; // Total cycles taken
+    uint32_t wrongBranches = wrongBranches1 - wrongBranches0; // Total wrong branches
+    uint32_t controlXfers = controlXfer1 - controlXfer0; // Total branch/jump instructions
+    uint32_t instructions = N_instructions1 - N_instructions0; // Total instructions
 
-    // CPI * 1000 (fixed point, 3 decimal places)
+    // CPI * 1000 (fixed point, 3 decimal places) = (cycles * 1000) / instructions
     uint32_t cpi_times_1000 = __divsi3(__mulsi3(User_Cycles, 1000), instructions);
 
     // Misprediction rate * 1000 (fixed point, 3 decimal places)
@@ -349,7 +367,7 @@ int main(void)
     uart_putint(miss_frac);
     uart_putc('\n');
 
-    uart_puts("Final sink:                ");
+    uart_puts("Final sink:                "); // Shows how many branch takens there were
     uart_putint(sink);
     uart_putc('\n');
     uart_puts("Done.\n");

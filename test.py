@@ -1,39 +1,44 @@
 # test_my_design.py (simple)
 
 import cocotb
-from cocotb.triggers import Timer
-from cocotb.clock import Clock
-from cocotb.triggers import RisingEdge
+from cocotb.triggers import Timer # Wait certain amount of sim time
+from cocotb.clock import Clock  # Gen clk
+from cocotb.triggers import RisingEdge  # Trigger on rising edge
 
+# Test definition
 @cocotb.test()
-async def isa_test(dut):
+async def isa_test(dut): # DUT is top level RTL module
     """Try accessing the design."""
-    clk = Clock(dut.clk, 1, "ns")
-    dut.usePredictor.value = 1
-    cocotb.start_soon(clk.start())
-    writeData = []
-    writeAddr = []
-    writePc = []
+    clk = Clock(dut.clk, 1, "ns") # Generate 1 ns clk
+    dut.usePredictor.value = 1 # Connected to TB.sv file
+    cocotb.start_soon(clk.start())  # Start clk in parallel
+
+    # Reset and wait for 1 ns
     for i in range(1):
         dut.rst.value = 1
         await Timer(1, "ns")
     dut.rst.value = 0
+
+    writeData = []
+    writeAddr = []
+    writePc = []
     memWriteAddr = []
+
     while(True):
         await Timer(1, "ns")
-        if (dut.uut.decode.regF.writeEn.value == 1):
+        if (dut.uut.decode.regF.writeEn.value == 1): # Check if register file write is enabled
             try:
-                writeData.append(dut.uut.decode.regF.writeData.value)
+                writeData.append(dut.uut.decode.regF.writeData.value) # Logging for debugging
                 writeAddr.append(dut.uut.decode.regF.writeAddr.value)
                 writePc.append(dut.uut.decode.pcPlus4.value-4)
             except:
                 pass
 
-        goodAddr = not((dut.dmemAddr.value == 0xFFFFFFFC) or (dut.dmemAddr.value == 0x0))
-        load = bool(dut.dmemWen.value)
-        store = dut.uut.M_regSrc.value == 1;
+        goodAddr = not((dut.dmemAddr.value == 0xFFFFFFFC) or (dut.dmemAddr.value == 0x0)) # Filter invalid addresses
+        load = bool(dut.dmemWen.value) # Mem read
+        store = dut.uut.M_regSrc.value == 1; # Mem write
 
-
+        # Logging memory operations by writing to array memWriteAddr used later in logging
         if (goodAddr&(load or store)):
             pc_plus4 = int(dut.uut.M_pcPlus4.value)
             dmem_addr = int(dut.dmemAddr.value)
@@ -47,8 +52,13 @@ async def isa_test(dut):
                 hex(rdata),
                 load)
             )
+
+        # Stops sim when we reach DEADCODE (comes from HALT in boot.s) or 1000ef (Not sure yet)
         if (dut.uut.decode.regF.writeData.value == 0xDEADC0DE)|(dut.dmemWdata.value == 0x1000ef):
             break 
+
+    # DEBUG PRINTING
+
     # for pc,addr,data in zip(writePc,writeAddr,writeData):
     #         msg = f"{hex(pc)},{hex(addr)},{hex(data)}"
     #         cocotb.log.info(msg)
