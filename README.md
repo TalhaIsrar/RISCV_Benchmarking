@@ -1,4 +1,6 @@
-# dummy32
+# RISCV Benchmarking
+
+Forked for understanding benchmarking and modifying to include CoreMark and use for other RISCV cores
 
 A 5-stage pipelined RV32I core started as a block diagram from *"Digital Design & Computer Architecture: RISC-V Edition"*, enhanced with full RV32I support and dynamic branch prediction.
 
