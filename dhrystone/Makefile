@@ -9,12 +9,12 @@ GCC-FLAGS = -march=rv32i_zicsr -mabi=ilp32
 
 SRC = boot.s dhry_1.c dhry_2.c strcmp.S malloc.c  div.c
 HDR = dhry.h
-RISCV-GCC = riscv32-unknown-elf-gcc
+RISCV-GCC = riscv64-unknown-elf-gcc
 
 override CFLAGS += $(DHRY-CFLAGS)
 rv32i_test.elf: $(SRC) $(HDR) link.ld
 	$(RISCV-GCC) $(GCC-FLAGS) $(CFLAGS) $(SRC) -T link.ld -o ../rv32i_test.elf
-	 riscv32-unknown-elf-objdump -D ../rv32i_test.elf > ../rv32i_test.dump
+	 riscv64-unknown-elf-objdump -D ../rv32i_test.elf > ../rv32i_test.dump
 clean:
 	rm -f *.i *.o 
 

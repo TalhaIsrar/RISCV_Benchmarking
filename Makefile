@@ -10,13 +10,13 @@ MODULE = test
 all: code.mem data.mem sim
 
 rv32i_test.elf:link.ld boot.s test.c
-		riscv32-unknown-elf-gcc -nostdlib -nostartfiles -O3 -march=rv32i_zicsr -mabi=ilp32 -T link.ld boot.s test.c -o rv32i_test.elf
+		riscv64-unknown-elf-gcc -nostdlib -nostartfiles -O3 -march=rv32i_zicsr -mabi=ilp32 -T link.ld boot.s test.c -o rv32i_test.elf
 rv32i_test.dump: rv32i_test.elf
-		riscv32-unknown-elf-objdump -D rv32i_test.elf > rv32i_test.dump
+		riscv64-unknown-elf-objdump -D rv32i_test.elf > rv32i_test.dump
 code.bin:rv32i_test.elf
-		riscv32-unknown-elf-objcopy -O binary --only-section=.text rv32i_test.elf code.bin
+		riscv64-unknown-elf-objcopy -O binary --only-section=.text rv32i_test.elf code.bin
 data.bin: rv32i_test.elf
-		riscv32-unknown-elf-objcopy -O binary -j .data -j .sdata rv32i_test.elf data.bin
+		riscv64-unknown-elf-objcopy -O binary -j .data -j .sdata rv32i_test.elf data.bin
 code.mem: code.bin rv32i_test.dump
 		hexdump -v -e '1/4 "%08x\n"' code.bin > code.mem
 data.mem: data.bin

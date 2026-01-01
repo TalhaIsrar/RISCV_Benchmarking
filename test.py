@@ -35,7 +35,18 @@ async def isa_test(dut):
 
 
         if (goodAddr&(load or store)):
-            memWriteAddr.append((hex(dut.dmemAddr.value),hex(dut.uut.M_pcPlus4.value-4),hex(dut.dmemWdata.value),hex(dut.dmemRdata.value),load))
+            pc_plus4 = int(dut.uut.M_pcPlus4.value)
+            dmem_addr = int(dut.dmemAddr.value)
+            wdata     = int(dut.dmemWdata.value)
+            rdata     = int(dut.dmemRdata.value)
+
+            memWriteAddr.append(
+                (hex(dmem_addr),
+                hex(pc_plus4 - 4),
+                hex(wdata),
+                hex(rdata),
+                load)
+            )
         if (dut.uut.decode.regF.writeData.value == 0xDEADC0DE)|(dut.dmemWdata.value == 0x1000ef):
             break 
     # for pc,addr,data in zip(writePc,writeAddr,writeData):
