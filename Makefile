@@ -96,7 +96,6 @@ data.mem: data.bin
 
 # Cocotb's makefile calls verilator and runs Python against the build simulation
 sim: code.mem data.mem
->>>>>>> 0cff64f (Added comments)
 include $(shell cocotb-config --makefiles)/Makefile.sim
 
 # delete generated files
