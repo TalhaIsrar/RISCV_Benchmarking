@@ -26,9 +26,9 @@ module TB;
   assign uartWen = dmemWen&(dmemAddr == 32'hFFFF_FFFC);
 
   assign dmemWenFinal = dmemWen&&(!uartWen);
-  assign dmemRdataFinal = dmemRdata;
+  assign dmemRdataFinal = (dmemAddr == 32'hFFFF_FFF0) ? timer_val : dmemRdata;
 
-
+  logic [31:0] timer_val;
 
 
   // Instantiate the core module
@@ -64,6 +64,12 @@ module TB;
             .data(uartData),
             .wEn(uartWen)
           );
+  timer Simtime(
+          .clk(clk),
+          .rst(rst),
+          .cycle_count(timer_val)
+  );
+
   initial
   begin
     $dumpfile("");

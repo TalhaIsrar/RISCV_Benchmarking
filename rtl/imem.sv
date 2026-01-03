@@ -1,5 +1,5 @@
 module imem #(
-    parameter DEPTH = 16383  //16K for now
+    parameter DEPTH = 65536  //16K for now
   )(
     output logic [31:0] rData,
     input logic [31:0] rAddr,

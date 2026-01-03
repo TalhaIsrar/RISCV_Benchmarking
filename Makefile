@@ -66,5 +66,5 @@ include $(shell cocotb-config --makefiles)/Makefile.sim
 
 # delete generated files
 clean_build: 
-	rm -rf *.mem *.bin *.elf *dump* 
+	rm -rf *.o *.mem *.bin *.elf *dump* 
 

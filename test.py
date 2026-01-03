@@ -24,13 +24,13 @@ async def isa_test(dut): # DUT is top level RTL module
     writePc = []
     memWriteAddr = []
 
+    cocotb.log.info("Reset done.")
     while(True):
         await Timer(1, "ns")
         if (dut.uut.decode.regF.writeEn.value == 1): # Check if register file write is enabled
             try:
-                writeData.append(dut.uut.decode.regF.writeData.value) # Logging for debugging
-                writeAddr.append(dut.uut.decode.regF.writeAddr.value)
-                writePc.append(dut.uut.decode.pcPlus4.value-4)
+                msg = f"{hex(dut.uut.decode.regF.writeData.value)},{hex(dut.uut.decode.regF.writeAddr.value)},{hex(dut.uut.decode.pcPlus4.value)}"
+                cocotb.log.info(msg)
             except:
                 pass
 
@@ -59,9 +59,9 @@ async def isa_test(dut): # DUT is top level RTL module
 
     # DEBUG PRINTING
 
-    # for pc,addr,data in zip(writePc,writeAddr,writeData):
-    #         msg = f"{hex(pc)},{hex(addr)},{hex(data)}"
-    #         cocotb.log.info(msg)
+    for pc,addr,data in zip(writePc,writeAddr,writeData):
+            msg = f"{hex(pc)},{hex(addr)},{hex(data)}"
+            cocotb.log.info(msg)
     # print("loadstore Addr,pc,dmemWdata,dmemRdata,store?:\n")
     # for i in memWriteAddr:
     #     print(i)
