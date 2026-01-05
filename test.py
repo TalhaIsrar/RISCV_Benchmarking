@@ -30,7 +30,7 @@ async def isa_test(dut): # DUT is top level RTL module
         if (dut.uut.decode.regF.writeEn.value == 1): # Check if register file write is enabled
             try:
                 msg = f"{hex(dut.uut.decode.regF.writeData.value)},{hex(dut.uut.decode.regF.writeAddr.value)},{hex(dut.uut.decode.pcPlus4.value)}"
-                cocotb.log.info(msg)
+                # cocotb.log.info(msg)
             except:
                 pass
 

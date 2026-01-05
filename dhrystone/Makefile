@@ -1,6 +1,6 @@
-DHRY-LFLAGS =
+DHRY-LFLAGS =		# placeholder for linker flags (empty)
 
-DHRY-CFLAGS := -O1 -DNOENUM -Wno-implicit
+DHRY-CFLAGS := -O1 -DNOENUM -Wno-implicit		# avoid enum usage; suppresses warnings for implicit declarations
 DHRY-CFLAGS += -fno-builtin-printf -fno-common -falign-functions=4 -nostartfiles 
 GCC-FLAGS = -march=rv32i_zicsr -mabi=ilp32
 

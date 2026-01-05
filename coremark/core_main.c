@@ -357,8 +357,10 @@ for (i = 0; i < MULTITHREAD; i++)
     }
     total_errors += check_data_types();
     /* and report results */
-    ee_printf("CoreMark Size    : %lu\n", (ee_u32)results[0].size);  // MODIFIED - Changed long signed to ee_u32
-    ee_printf("Total ticks      : %lu\n", (ee_u32)total_time);       // MODIFIED - Changed long signed to ee_u32
+
+    
+    ee_printf("CoreMark Size    : %u\n", results[0].size);  // MODIFIED - Changed long signed to ee_u32
+    ee_printf("Total ticks      : %u\n", total_time);       // MODIFIED - Changed long signed to ee_u32
 
     //ee_printf("CoreMark Size    : %lu\n", (long unsigned)results[0].size);
     //ee_printf("Total ticks      : %lu\n", (long unsigned)total_time);
