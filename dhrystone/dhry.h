@@ -345,7 +345,7 @@
  */
 #include <stdint.h>
 /* Compiler and system dependent definitions: */
-#define TIMES // Use custom tick timer instead of <sys/times.h>
+#define TIMES           // Change: Use custom tick timer instead of <sys/times.h>
 // Memory-mapped 32-bit timer address (change if needed)
 // #define TIMER_ADDR ((volatile unsigned int *)0xFFFFFFF8)
 // #define TIMER_REG_ADDR ((volatile unsigned int *)0xFFFFFFF4)
