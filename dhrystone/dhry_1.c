@@ -19,7 +19,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdint.h>
-#define DHRY_ITERS 500
+#define DHRY_ITERS 500    // Change: 500 instead of 2000
 
 /* Global Variables: */
 
@@ -48,7 +48,7 @@ Boolean Reg = true;
 
 #ifdef TIMES
 /* Measurements should last for 1000 cycles */
-#define Too_Small_Cycles (1000)
+#define Too_Small_Cycles (1000)   // Change: Too_Small_Time logic adapted to Too_Small_Cycles
 /* Measurements should last at least about 2 seconds */
 #endif
 #ifdef TIME
@@ -65,7 +65,7 @@ extern clock_t clock();
 
 /* end of variables for time measurement */
 
-void uart_putc(char c)
+void uart_putc(char c)      // Change: Extra functions added instead of print
 {
   volatile char *uart_tx = (char *)0xFFFFFFFC;
   *uart_tx = c;
@@ -193,7 +193,7 @@ main()
   /* Start timer */
   /***************/
   uint32_t wrongBranches0, controlXfer0, timer0, wrongBranches1, controlXfer1, N_instructions0, N_instructions1, timer1, User_Cycles;
-
+  // introduces reads of RISC-V CSRs instead of OS-based timing before start
 #ifdef TIMES
   asm volatile("csrr %0, 0x80" : "=r"(wrongBranches0));
   asm volatile("csrr %0, 0x81" : "=r"(controlXfer0));
@@ -251,6 +251,8 @@ main()
   /**************/
   /* Stop timer */
   /**************/
+
+  // Change: introduces reads of RISC-V CSRs at the end
   asm volatile("csrr %0, 0x80" : "=r"(wrongBranches1));
   asm volatile("csrr %0, 0x81" : "=r"(controlXfer1));
   asm volatile("csrr %0, 0x82" : "=r"(N_instructions1));
