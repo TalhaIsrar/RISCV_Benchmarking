@@ -127,12 +127,14 @@ main(int argc, char *argv[])
 #endif
     /* first call any initializations needed */
     portable_init(&(results[0].port), &argc, argv);
+    ee_printf("Init Complete\n");
     /* First some checks to make sure benchmark will run ok */
     if (sizeof(struct list_head_s) > 128)
     {
         ee_printf("list_head structure too big for comparable data!\n");
         return MAIN_RETURN_VAL;
     }
+    ee_printf("Initial Check complete\n");
     results[0].seed1      = get_seed(1);
     results[0].seed2      = get_seed(2);
     results[0].seed3      = get_seed(3);
@@ -141,6 +143,7 @@ main(int argc, char *argv[])
     results[0].iterations = 1;
 #endif
     results[0].execs = get_seed_32(5);
+    ee_printf("Seed Set\n");
     if (results[0].execs == 0)
     { /* if not supplied, execute all algorithms */
         results[0].execs = ALL_ALGORITHMS_MASK;
@@ -160,6 +163,8 @@ main(int argc, char *argv[])
         results[0].seed2 = 0x3415;
         results[0].seed3 = 0x66;
     }
+    ee_printf("Seed Set Complete\n");
+
 #if (MEM_METHOD == MEM_STATIC)
     results[0].memblock[0] = (void *)static_memblk;
     results[0].size        = TOTAL_DATA_SIZE;
@@ -217,6 +222,8 @@ for (i = 0; i < MULTITHREAD; i++)
             j++;
         }
     }
+    ee_printf("Call inits\n");
+
     /* call inits */
     for (i = 0; i < MULTITHREAD; i++)
     {
@@ -239,10 +246,12 @@ for (i = 0; i < MULTITHREAD; i++)
                 results[0].size, results[i].seed1, results[i].memblock[3]);
         }
     }
+    ee_printf("Auto Iterations\n");
 
     /* automatically determine number of iterations if not set */
     if (results[0].iterations == 0)
     {
+        ee_printf("Iterations Not Set\n");
         secs_ret secs_passed = 0;
         ee_u32   divisor;
         results[0].iterations = 1;
@@ -263,8 +272,12 @@ for (i = 0; i < MULTITHREAD; i++)
             divisor = 1;
         results[0].iterations *= 1 + 10 / divisor;
     }
+    ee_printf("Actual Benchmark Start\n");
+
     /* perform actual benchmark */
     start_time();
+    ee_printf("Got start time\n");
+
 #if (MULTITHREAD > 1)
     if (default_num_contexts > MULTITHREAD)
     {
@@ -283,13 +296,17 @@ for (i = 0; i < MULTITHREAD; i++)
 #else
     iterate(&results[0]);
 #endif
+    ee_printf("Getting End time\n");
     stop_time();
+    ee_printf("Actual Benchmark End\n");
+
     total_time = get_time();
     /* get a function of the input to report */
     seedcrc = crc16(results[0].seed1, seedcrc);
     seedcrc = crc16(results[0].seed2, seedcrc);
     seedcrc = crc16(results[0].seed3, seedcrc);
     seedcrc = crc16(results[0].size, seedcrc);
+    ee_printf("CRC Switch\n");
 
     switch (seedcrc)
     {                /* test known output for common seeds */
@@ -320,6 +337,8 @@ for (i = 0; i < MULTITHREAD; i++)
             total_errors = -1;
             break;
     }
+    ee_printf("Known Id\n");
+
     if (known_id >= 0)
     {
         for (i = 0; i < default_num_contexts; i++)
@@ -358,9 +377,9 @@ for (i = 0; i < MULTITHREAD; i++)
     total_errors += check_data_types();
     /* and report results */
 
-    
-    ee_printf("CoreMark Size    : %u\n", results[0].size);  // MODIFIED - Changed long signed to ee_u32
-    ee_printf("Total ticks      : %u\n", total_time);       // MODIFIED - Changed long signed to ee_u32
+    ee_printf("Results\n");
+    ee_printf("CoreMark Size    : %lu\n", (ee_u32)results[0].size);  // MODIFIED - Changed long signed to ee_u32
+    ee_printf("Total ticks      : %lu\n", (long unsigned)total_time);       // MODIFIED - Changed long signed to ee_u32
 
     //ee_printf("CoreMark Size    : %lu\n", (long unsigned)results[0].size);
     //ee_printf("Total ticks      : %lu\n", (long unsigned)total_time);

@@ -1,26 +1,30 @@
+# Minimal Makefile for RV32I CoreMark simulation
+
 PORT_DIR = barebones
 
-ITERATIONS     = 2
-CLOCKS_PER_SEC = 120
+# CoreMark run configuration
+ITERATIONS     = 1
+MULTITHREAD    = 1
+CLOCKS_PER_SEC = 10000
 FLAGS_STR      = ""
 
+# Compiler flags
+CFLAGS = -O2 -Wall -Wextra
 XCFLAGS = \
+	-g \
 	-DITERATIONS=$(ITERATIONS) \
+	-DMULTITHREAD=$(MULTITHREAD) \
 	-DCLOCKS_PER_SEC=$(CLOCKS_PER_SEC) \
-	-DFLAGS_STR=\"$(FLAGS_STR)\" \
-	-I . \
-	-I $(PORT_DIR)
+	-DPERFORMANCE_RUN=1 \
+	-DDEFAULT_EXEC_MASK=ID_LIST \
+	-I ./ \
+	-I $(PORT_DIR) \
+	-DFLAGS_STR=\"$(FLAGS_STR)\"
 
-DHRY-CFLAGS := -O1 -DNOENUM -Wno-implicit
-DHRY-CFLAGS += -fno-builtin-printf -fno-common -falign-functions=4
-DHRY-CFLAGS += -ffreestanding -fno-stack-protector
+# Linker flags
+LDFLAGS = -nostartfiles -static
 
-XCFLAGS += $(DHRY-CFLAGS)
-
-LDFLAGS = -nostartfiles
-
-GCC-FLAGS = -march=rv32i -mabi=ilp32
-
+# Source files
 CORE_SRC = \
 	core_list_join.c \
 	core_main.c \
@@ -33,16 +37,16 @@ PORT_SRC = \
 	$(PORT_DIR)/ee_printf.c
 
 STARTUP = start.s
-
 SRC = $(STARTUP) $(CORE_SRC) $(PORT_SRC)
 
-RISCV-GCC = riscv-none-elf-gcc
+# Toolchain
+RISCV-GCC = riscv32-unknown-elf-gcc
+RISCV-OBJDUMP = riscv32-unknown-elf-objdump
 
-override CFLAGS += $(XCFLAGS)
-
+# Build ELF
 rv32i_test.elf: $(SRC) link.ld
-	$(RISCV-GCC) $(GCC-FLAGS) $(CFLAGS) $(SRC) $(LDFLAGS) -T link.ld -o ../rv32i_test.elf
-	riscv64-unknown-elf-objdump -D ../rv32i_test.elf > ../rv32i_test.dump
+	$(RISCV-GCC) $(CFLAGS) $(XCFLAGS) $(SRC) $(LDFLAGS) -T link.ld -o ../rv32i_test.elf
+	$(RISCV-OBJDUMP) -D ../rv32i_test.elf > ../rv32i_test.dump
 
 clean:
-	rm -f *.o $(PORT_DIR)/*.o ../rv32i_test.elf ../rv32i_test.dump
+	rm -f *.o $(PORT_DIR)/*.o rv32i_test.elf rv32i_test.dump

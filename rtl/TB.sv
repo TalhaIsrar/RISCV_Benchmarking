@@ -26,7 +26,7 @@ module TB;
   assign uartWen = dmemWen&(dmemAddr == 32'hFFFF_FFFC);
 
   assign dmemWenFinal = dmemWen&&(!uartWen);
-  assign dmemRdataFinal = (dmemAddr == 32'hFFFF_FFF0) ? timer_val : dmemRdata;
+  assign dmemRdataFinal = (dmemAddr == 32'hFFFF_FF00) ? timer_val : dmemRdata;
 
   logic [31:0] timer_val;
 
@@ -55,7 +55,7 @@ module TB;
          .rData(dmemRdata),
          .clk(clk),
          .wEn(dmemWenFinal),
-         .addr(dmemAddr),
+         .addr(dmemAddr - 32'h1000_0000),
          .size(dmemSize)
        );
   simUart uart(

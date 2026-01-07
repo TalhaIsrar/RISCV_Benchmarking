@@ -44,7 +44,7 @@ volatile ee_s32 seed5_volatile = 0;
 CORETIMETYPE
 barebones_clock()
 {
-    volatile unsigned int* hardwareCounterAddr = (unsigned int*)0xFFFFFFF0;  // Address of the counter
+    volatile unsigned int* hardwareCounterAddr = (unsigned int*)0xFFFFFF00;  // Address of the counter
     unsigned int hardwareCounter; 
     hardwareCounter = *hardwareCounterAddr;
     return (CORETIMETYPE)hardwareCounter;

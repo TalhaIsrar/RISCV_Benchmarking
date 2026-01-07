@@ -40,6 +40,7 @@ SECTIONS
   } > DMEM
 
   .bss   : {
+    __bss_start = .;
     *(.bss*)
     *(COMMON)
     . = ALIGN(4);
@@ -47,4 +48,5 @@ SECTIONS
   } > DMEM
 
   /* Define heap and stack boundaries */
+  _stack_top = (ORIGIN(DMEM) + LENGTH(DMEM)) & ~0xF;  
 }

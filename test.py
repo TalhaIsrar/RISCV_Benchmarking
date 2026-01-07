@@ -38,6 +38,11 @@ async def isa_test(dut): # DUT is top level RTL module
         load = bool(dut.dmemWen.value) # Mem read
         store = dut.uut.M_regSrc.value == 1; # Mem write
 
+        if ((int(dut.data.addr.value) > int(0x1000_FFFF))&(load or store)):
+            if not((dut.dmemAddr.value == 0xFFFFFFFC) or (dut.dmemAddr.value == 0xFFFFFF00) or (dut.dmemAddr.value == 0x0)):
+                cocotb.log.info(f"{hex(dut.data.addr.value)}")
+
+
         # Logging memory operations by writing to array memWriteAddr used later in logging
         if (goodAddr&(load or store)):
             pc_plus4 = int(dut.uut.M_pcPlus4.value)
@@ -52,6 +57,9 @@ async def isa_test(dut): # DUT is top level RTL module
                 hex(rdata),
                 load)
             )
+
+        if (dut.uut.decode.regF.writeData.value == 0xDEAD0000):
+            cocotb.log.info("SAW DEAD0000") 
 
         # Stops sim when we reach DEADCODE (comes from HALT in boot.s) or 1000ef (Not sure yet)
         if (dut.uut.decode.regF.writeData.value == 0xDEADC0DE)|(dut.dmemWdata.value == 0x1000ef):

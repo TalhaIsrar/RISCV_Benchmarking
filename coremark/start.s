@@ -1,11 +1,21 @@
 .section .text
 .align 2
-.globl _start
+.global _start
 .extern main
 
 _start:
     # Set stack pointer
-    la sp, 0x1000FFFF
+    la sp, _stack_top
+    andi sp, sp, -16
+
+    # Zero out .bss section
+    la a0, __bss_start       # start of .bss
+    la a1, __bss_end    # end of .bss
+_init_bss:
+    bgeu a0, a1, _init_reg   # If _sbss >= _ebss, stop
+    sw zero, 0(a0)           # Clear the word at _sbss = 0
+    addi a0, a0, 4           # Move to the next word
+    j _init_bss
 
 _init_reg:
 	/* zero-initialize all registers except x2 because stack pointer */
@@ -41,6 +51,7 @@ _init_reg:
 	addi x31, zero, 0
 
 _call_main:
+    li t0,0xDEAD0000
     call main
     
 HALT:
