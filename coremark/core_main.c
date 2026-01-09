@@ -51,6 +51,7 @@ static ee_u16 state_known_crc[]  = { (ee_u16)0x5e47,
 void *
 iterate(void *pres)
 {
+    ee_printf("Start");
     ee_u32        i;
     ee_u16        crc;
     core_results *res        = (core_results *)pres;
@@ -62,7 +63,7 @@ iterate(void *pres)
 
     for (i = 0; i < iterations; i++)
     {
-        //ee_printf("%0c", (char)(i+1));  // MODIFIED - Debug print
+        ee_printf("Iteration");  // MODIFIED - Debug print
         crc      = core_bench_list(res, 1);
         res->crc = crcu16(crc, res->crc);
         crc      = core_bench_list(res, -1);
@@ -70,7 +71,7 @@ iterate(void *pres)
         if (i == 0)
             res->crclist = res->crc;
     }
-    //ee_printf("Iternations completed");   // MODIFIED - Debug print
+    ee_printf("Iternations completed");   // MODIFIED - Debug print
     return NULL;
 }
 
@@ -294,6 +295,7 @@ for (i = 0; i < MULTITHREAD; i++)
         core_stop_parallel(&results[i]);
     }
 #else
+    ee_printf("Iterations start\n");
     iterate(&results[0]);
 #endif
     ee_printf("Getting End time\n");
