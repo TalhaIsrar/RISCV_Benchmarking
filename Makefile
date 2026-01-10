@@ -12,7 +12,8 @@
 # Next 3 are for cocotb
 SIM ?= verilator
 TOPLEVEL_LANG ?= verilog
-WAVES = 1 			# waveform dumping enabled
+# WAVES = 1 			# waveform dumping enabled
+WAVES = 0
 VERILOG_SOURCES += $(PWD)/rtl/*.sv
 VERILOG_SOURCES += $(PWD)/rtl/core/*.sv
 
@@ -21,7 +22,9 @@ VERILOG_SOURCES += $(PWD)/rtl/core/*.sv
 # Use .fst format (fast)
 # Enable timing
 # Use 8 threads
-EXTRA_ARGS += --trace --trace-structs --trace-fst --timing -j 8
+# EXTRA_ARGS += --trace --trace-structs --trace-fst --timing -j 8 # DEBUGGING
+EXTRA_ARGS += -j 8
+
 
 # Connects cocotb test.py -> TB in verilog
 TOPLEVEL = TB
@@ -65,6 +68,6 @@ sim: code.mem data.mem
 include $(shell cocotb-config --makefiles)/Makefile.sim
 
 # delete generated files
-clean_build: 
+del: 
 	rm -rf *.o *.mem *.bin *.elf *dump* 
 

@@ -63,7 +63,6 @@ iterate(void *pres)
 
     for (i = 0; i < iterations; i++)
     {
-        ee_printf("Iteration");  // MODIFIED - Debug print
         crc      = core_bench_list(res, 1);
         res->crc = crcu16(crc, res->crc);
         crc      = core_bench_list(res, -1);
@@ -71,7 +70,6 @@ iterate(void *pres)
         if (i == 0)
             res->crclist = res->crc;
     }
-    ee_printf("Iternations completed");   // MODIFIED - Debug print
     return NULL;
 }
 
@@ -144,7 +142,6 @@ main(int argc, char *argv[])
     results[0].iterations = 1;
 #endif
     results[0].execs = get_seed_32(5);
-    ee_printf("Seed Set\n");
     if (results[0].execs == 0)
     { /* if not supplied, execute all algorithms */
         results[0].execs = ALL_ALGORITHMS_MASK;
@@ -164,7 +161,6 @@ main(int argc, char *argv[])
         results[0].seed2 = 0x3415;
         results[0].seed3 = 0x66;
     }
-    ee_printf("Seed Set Complete\n");
 
 #if (MEM_METHOD == MEM_STATIC)
     results[0].memblock[0] = (void *)static_memblk;
@@ -223,7 +219,6 @@ for (i = 0; i < MULTITHREAD; i++)
             j++;
         }
     }
-    ee_printf("Call inits\n");
 
     /* call inits */
     for (i = 0; i < MULTITHREAD; i++)
@@ -247,7 +242,6 @@ for (i = 0; i < MULTITHREAD; i++)
                 results[0].size, results[i].seed1, results[i].memblock[3]);
         }
     }
-    ee_printf("Auto Iterations\n");
 
     /* automatically determine number of iterations if not set */
     if (results[0].iterations == 0)
@@ -380,7 +374,7 @@ for (i = 0; i < MULTITHREAD; i++)
     /* and report results */
 
     ee_printf("Results\n");
-    ee_printf("CoreMark Size    : %lu\n", (ee_u32)results[0].size);  // MODIFIED - Changed long signed to ee_u32
+    ee_printf("CoreMark Size    : %lu\n", (long unsigned)results[0].size);  // MODIFIED - Changed long signed to ee_u32
     ee_printf("Total ticks      : %lu\n", (long unsigned)total_time);       // MODIFIED - Changed long signed to ee_u32
 
     //ee_printf("CoreMark Size    : %lu\n", (long unsigned)results[0].size);

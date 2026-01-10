@@ -9,7 +9,7 @@ _start:
     andi sp, sp, -16
 
     # Zero out .bss section
-    la a0, __bss_start       # start of .bss
+    la a0, __bss_start       # start of .sbss
     la a1, __bss_end    # end of .bss
 _init_bss:
     bgeu a0, a1, _init_reg   # If _sbss >= _ebss, stop
@@ -50,18 +50,11 @@ _init_reg:
     addi x30, zero, 0
 	addi x31, zero, 0
 
-_call_main:
     li t0,0xDEAD0000
     call main
     
 HALT:
     li t0,0xDEADC0DE
-    nop
-    nop
-    nop
-    nop
-    nop
-    nop
     nop
     nop
     j HALT

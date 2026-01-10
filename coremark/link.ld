@@ -1,12 +1,15 @@
 IMEM_BASE = 0x00000000;
 DMEM_BASE = 0x10000000;
 
+OUTPUT_ARCH(riscv)
+OUTPUT_FORMAT(elf32-littleriscv)
+
 ENTRY(_start)
 
 MEMORY
 {
   IMEM (rx) : ORIGIN = IMEM_BASE, LENGTH = 64K
-  DMEM (rw) : ORIGIN = DMEM_BASE, LENGTH = 64K
+  DMEM (rw) : ORIGIN = DMEM_BASE, LENGTH = 128K
 }
 
 SECTIONS
@@ -46,7 +49,10 @@ SECTIONS
     . = ALIGN(4);
     __bss_end = .;
   } > DMEM
+  .stack (NOLOAD) : {
+      . = . + 16K;   /* increase to 32K if needed */
+  } > DMEM
 
   /* Define heap and stack boundaries */
-  _stack_top = (ORIGIN(DMEM) + LENGTH(DMEM)) & ~0xF;  
+  _stack_top = .;  
 }

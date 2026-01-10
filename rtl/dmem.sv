@@ -1,5 +1,5 @@
 module dmem #(
-    parameter DEPTH = 64 //32K
+    parameter DEPTH = 128
   )(
     input logic [31:0] wData,
     output logic [31:0] rData,
