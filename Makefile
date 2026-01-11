@@ -30,30 +30,45 @@ EXTRA_ARGS += -j 8
 TOPLEVEL = TB
 MODULE = test
 
+all:
+	@echo "Select out of following options:"
+	@echo "  make coremark"
+	@echo "  make dhrystone"
+	@echo "  make riscv-tests"
+	@echo "  make branch_tests"
+
+.PHONY: coremark dhrystone riscv-tests branch_test
+coremark: del
+	$(MAKE) -C coremark
+	$(MAKE) mems
+
+dhrystone: del
+	$(MAKE) -C dhrystone
+	$(MAKE) mems
+
+riscv-tests: del
+	$(MAKE) -C riscv-tests
+	$(MAKE) mems
+
+branch_test: del
+	$(MAKE) -C branch_test
+	$(MAKE) mems
+
 # If you type make: it runs first target
-all: code.mem data.mem sim
+mems: code.mem data.mem sim
 
 # C/ASM → ELF → binary → hex → loaded into Verilog memories → executed by your CPU
 # ELF -> Executable and Linkable Format -> Final compiled programme -> A complete description of a program and how it should live in memory.
 # We extract pieces from elf as needed
 # Dump is disassembled instructions in human readable hex -> Used for debugging
 
-# building the executable
-rv32i_test.elf:link.ld boot.s test.c
-		riscv64-unknown-elf-gcc -nostdlib -nostartfiles -O3 -march=rv32i_zicsr -mabi=ilp32 -T link.ld boot.s test.c -o rv32i_test.elf
-# No C standard lib + No def startup code + high optim + isa + memory map + boot + C program + output elf
-
-# disassembly dump (debug helper)
-rv32i_test.dump: rv32i_test.elf
-		riscv64-unknown-elf-objdump -D rv32i_test.elf > rv32i_test.dump
-
 # dump .text section as raw bytes to code.bin - Extracts instructions only
-code.bin:rv32i_test.elf
-		riscv64-unknown-elf-objcopy -O binary --only-section=.text rv32i_test.elf code.bin
+code.bin:
+		riscv32-unknown-elf-objcopy -O binary --only-section=.text rv32i_test.elf code.bin
 
 # dump .data and .sdata sections to data.bin (RAM image) (doesn't extract .bss as it's zero-init by def)
-data.bin: rv32i_test.elf
-		riscv64-unknown-elf-objcopy -O binary -j .data -j .sdata rv32i_test.elf data.bin
+data.bin: 
+		riscv32-unknown-elf-objcopy -O binary -j .data -j .sdata rv32i_test.elf data.bin
 
 # read code.bin as 4-byte words and print each word as 8 hex digits per line, so code.mem has 32-bit word per line
 code.mem: code.bin rv32i_test.dump
@@ -65,9 +80,16 @@ data.mem: data.bin
 
 # Cocotb's makefile calls verilator and runs Python against the build simulation
 sim: code.mem data.mem
-include $(shell cocotb-config --makefiles)/Makefile.sim
+	$(MAKE) -f $(shell cocotb-config --makefiles)/Makefile.sim \
+		SIM=$(SIM) \
+		TOPLEVEL_LANG=$(TOPLEVEL_LANG) \
+		TOPLEVEL=$(TOPLEVEL) \
+		MODULE=$(MODULE) \
+		WAVES=$(WAVES) \
+		VERILOG_SOURCES="$(VERILOG_SOURCES)" \
+		EXTRA_ARGS="$(EXTRA_ARGS)"
 
-# delete generated files
-del: 
-	rm -rf *.o *.mem *.bin *.elf *dump* 
+del:
+	-rm -rf *.o *.mem *.bin *.elf *dump* *.xml sim_build
 
+.DEFAULT_GOAL := all

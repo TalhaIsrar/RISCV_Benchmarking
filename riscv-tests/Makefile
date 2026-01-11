@@ -1,4 +1,4 @@
-XLEN ?= 64
+XLEN ?= 32
 src_dir := .
 
 RISCV_PREFIX ?= riscv$(XLEN)-unknown-elf-
@@ -90,7 +90,7 @@ rv32i_test.elf:start.S link.ld
 
 
 test.dump: rv32i_test.elf
-		riscv64-unknown-elf-objdump -D ../rv32i_test.elf > ../rv32i_test.dump
+		riscv32-unknown-elf-objdump -D ../rv32i_test.elf > ../rv32i_test.dump
 	
 clean:
 	rm -rf $(TESTS_PATH)/*.o $(src_dir)/start.o ../rv32i_test.elf ../test.dump

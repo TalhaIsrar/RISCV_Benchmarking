@@ -51,7 +51,6 @@ static ee_u16 state_known_crc[]  = { (ee_u16)0x5e47,
 void *
 iterate(void *pres)
 {
-    ee_printf("Start");
     ee_u32        i;
     ee_u16        crc;
     core_results *res        = (core_results *)pres;
