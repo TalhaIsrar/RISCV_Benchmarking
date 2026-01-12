@@ -6,7 +6,6 @@
 _start:
     # Set stack pointer
     la sp, _stack_top
-    andi sp, sp, -16
 
     # Zero out .bss section
     la a0, __bss_start       # start of .sbss
