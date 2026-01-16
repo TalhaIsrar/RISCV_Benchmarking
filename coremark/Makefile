@@ -4,7 +4,6 @@ PORT_DIR = barebones
 
 # CoreMark run configuration
 ITERATIONS     = 1
-MULTITHREAD    = 1
 CLOCKS_PER_SEC = 1000
 FLAGS_STR      = ""
 
@@ -13,7 +12,6 @@ CFLAGS = -O2 -Wall -Wextra -march=rv32i -mabi=ilp32 -fno-builtin
 XCFLAGS = \
 	-g \
 	-DITERATIONS=$(ITERATIONS) \
-	-DMULTITHREAD=$(MULTITHREAD) \
 	-DCLOCKS_PER_SEC=$(CLOCKS_PER_SEC) \
 	-DPERFORMANCE_RUN=1 \
 	-DDEFAULT_EXEC_MASK=ID_LIST \

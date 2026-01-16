@@ -69,11 +69,11 @@ module id_ex_pipeline(
             ex_pred_taken <= 1'b0;
             ex_forward_pipeline_flush <= 1'b0;
         end else if (pipeline_flush) begin
-            ex_invalid_inst <= id_invalid_inst;
-            ex_instruction <= id_instruction;
-            ex_pc <= ex_pc;
-            ex_op1 <= id_op1;
-            ex_op2 <= id_op2;
+            ex_invalid_inst <= 0;
+            ex_instruction <= 0;
+            ex_pc <= 0;
+            ex_op1 <= 0;
+            ex_op2 <= 0;
             ex_immediate <= 32'h00000000;
             ex_opcode <= 7'b0010011;
             ex_alu_src <= 1'b1;
@@ -84,9 +84,9 @@ module id_ex_pipeline(
             ex_mem_store_type <= 2'b00;
             ex_wb_load <= 1'b0;
             ex_wb_reg_file <= 1'b0;
-            ex_wb_rd <= id_wb_rd;
-            ex_rs1 <= id_rs1;
-            ex_rs2 <= id_rs2;
+            ex_wb_rd <= 0;
+            ex_rs1 <= 0;
+            ex_rs2 <= 0;
             ex_pred_taken <= 1'b0;
             ex_forward_pipeline_flush <= pipeline_flush;
         end else if (pipeline_en) begin

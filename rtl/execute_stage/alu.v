@@ -13,8 +13,8 @@ module alu(
 
     always @(*) begin
         case (ALUControl)
-            4'b0000:  result = op1 + op2;
-            4'b0001:  result = op1 - op2;
+            4'b0000: result = $signed(op1) + $signed(op2);
+            4'b0001: result = $signed(op1) - $signed(op2);
             4'b0010:  result = op1 & op2;
             4'b0011:   result = op1 | op2;
             4'b0100:  result = op1 ^ op2;

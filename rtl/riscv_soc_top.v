@@ -29,6 +29,7 @@ module riscv_soc_top(
     wire m_type_inst;
     wire stall_axi;
     wire ex_if_jump_en;
+    wire ex_mem_pipeline_en;
 
     // IF/ID Connection
     wire [31:0] if_instruction, id_instruction;
@@ -81,17 +82,7 @@ module riscv_soc_top(
     wire [1:0]  mem_memory_store_type;
     wire        mem_wb_load;
     wire        mem_wb_reg_file;
-
-    // IO to/from AXI4 Lite
-    wire axi_write_start;
-    wire [31:0] axi_write_addr;
-    wire [31:0] axi_write_data;
-    wire [3:0] axi_write_strobe;
-    wire axi_write_busy;
-    wire axi_read_start;
-    wire [31:0] axi_read_addr;
-    wire [31:0] axi_read_data;
-    wire axi_read_busy;
+    wire        valid_addr;
 
     // MEM/WB Connection
     wire [31:0] mem_read_data, wb_read_data;
@@ -109,8 +100,8 @@ module riscv_soc_top(
         .pc_jump_addr(ex_if_pc_jump_addr),
         .jump_en(ex_if_jump_en),
         .btb_target_pc(btb_target_pc),
-        .btb_pc_valid(btb_pc_valid), // Replace this by 1'b0 to disconnect BTB
-        .btb_pc_predictTaken(btb_pc_predictTaken), // Replace this by 1'b0 to disconnect BTB
+        .btb_pc_valid(0), // Replace this by 1'b0 to disconnect BTB
+        .btb_pc_predictTaken(0), // Replace this by 1'b0 to disconnect BTB
         .instruction(if_instruction),
         .pc(if_pc)
     );
@@ -121,7 +112,7 @@ module riscv_soc_top(
         .rst(rst),
         .pc(if_pc),
         .update_pc(ex_pc),
-        .update(btb_update), // Replace this by 1'b0 to disconnect BTB otherwise keep btb_update
+        .update(0), // Replace this by 1'b0 to disconnect BTB otherwise keep btb_update
         .update_target(btb_update_target),
         .mispredicted(ex_if_jump_en),
         .target_pc(btb_target_pc),
@@ -238,7 +229,7 @@ module riscv_soc_top(
         .pc(ex_pc),
         .op1(ex_op1),
         .op2(ex_op2),
-        .pipeline_flush(ex_mem_pipeline_flush),
+        .pipeline_flush(ex_forward_pipeline_flush),
         .immediate(ex_immediate),
         .func7(ex_func7),
         .func3(ex_func3),
@@ -273,22 +264,20 @@ module riscv_soc_top(
         .jump_branch_taken(ex_if_jump_en),
         .invalid_inst(invalid_inst),
         .stall(0),
-        .mem_read_write(mem_memory_write || mem_memory_read || stall_axi),
         .if_id_pipeline_flush(if_id_pipeline_flush),
         .if_id_pipeline_en(if_id_pipeline_en),
         .id_ex_pipeline_flush(id_ex_pipeline_flush),
         .id_ex_pipeline_en(id_ex_pipeline_en),
-        .ex_mem_pipeline_flush(ex_mem_pipeline_flush),
-        .mem_wb_pipeline_en(mem_wb_pipeline_en),
         .pc_en(pc_en),
-        .load_stall(load_stall)
+        .load_stall(load_stall),
+        .ex_mem_pipeline_en(ex_mem_pipeline_en)
     );
 
     // Instantiate the EX/MEM pipeline module
     ex_mem_pipeline ex_mem_pipeline_inst (
         .clk(clk),
         .rst(rst),
-        .pipeline_flush(ex_mem_pipeline_flush),
+        .pipeline_flush(0),
         .pipeline_en(1),
         .ex_result(ex_result),
         .ex_op2_selected(ex_op2_selected),
@@ -302,7 +291,6 @@ module riscv_soc_top(
         .mem_result(mem_result),
         .mem_op2_selected(mem_op2_selected),
         .mem_memory_write(mem_memory_write),
-        .mem_memory_read(mem_memory_read),
         .mem_memory_load_type(mem_memory_load_type),
         .mem_memory_store_type(mem_memory_store_type),
         .mem_wb_load(mem_wb_load),
@@ -312,50 +300,21 @@ module riscv_soc_top(
 
     // Instantiate the Memory stage module
     mem_stage mem_stage_inst (
+        .clk(clk),
+        .rst(rst),
         .result(mem_result),
         .op2_data(mem_op2_selected),
         .mem_write(mem_memory_write),
-        .mem_read(mem_memory_read),
         .store_type(mem_memory_store_type),
         .load_type(mem_memory_load_type),
         .read_data(mem_read_data),
-        .calculated_result(mem_calculated_result),
-        .stall_axi(stall_axi),
-
-        .axi_write_start(axi_write_start),
-        .axi_write_addr(axi_write_addr),
-        .axi_write_data(axi_write_data),
-        .axi_write_strobe(axi_write_strobe),
-        .axi_write_busy(axi_write_busy),
-        .axi_read_start(axi_read_start),
-        .axi_read_addr(axi_read_addr),
-        .axi_read_data(axi_read_data),
-        .axi_read_busy(axi_read_busy)
-    );
-
-    axi4_lite_peripheral_top #(
-        .ADDR_WIDTH(32),
-        .DATA_WIDTH(32)
-    ) axi4_lite_bus(
-        .clk(clk),
-        .rst(rst),
-        .write_start(axi_write_start),
-        .write_addr(axi_write_addr),
-        .write_data(axi_write_data),
-        .write_strobe(axi_write_strobe),
-        .write_busy(axi_write_busy),
-        .read_start(axi_read_start),
-        .read_addr(axi_read_addr),
-        .read_data(axi_read_data),
-        .read_busy(axi_read_busy),
-        .led(led)
+        .calculated_result(mem_calculated_result)
     );
 
     // Instantiate the MEM/WB pipeline module
     mem_wb_pipeline mem_wb_pipeline_inst (
         .clk(clk),
         .rst(rst),
-        .mem_wb_pipeline_en(mem_wb_pipeline_en),
         .mem_wb_load(mem_wb_load),
         .mem_wb_reg_file(mem_wb_reg_file),
         .mem_read_data(mem_read_data),

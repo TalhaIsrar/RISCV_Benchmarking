@@ -85,14 +85,14 @@ module execute_stage(
                 op2_alu = immediate;
             end
             default: begin
-                op1_alu = invalid_inst ? 0 : op1_forwarded;
+                op1_alu = op1_forwarded;
                 op2_alu = ex_alu_src ? immediate : op2_forwarded;
             end      
         endcase
     end
         
-    assign op1_valid = op1_alu;
-    assign op2_valid = op2_alu;
+    assign op1_valid = pipeline_flush ? 0 : op1_alu;
+    assign op2_valid = pipeline_flush ? 0 : op2_alu;
 
     // Instantiate the PC Jump Module
     pc_jump pc_jump_inst (
@@ -131,8 +131,8 @@ module execute_stage(
     );
 
     // Check if we have data from M unit
-    assign result = pipeline_flush ? 0 : alu_result;
+    assign result = alu_result;
     assign wb_reg_file = ex_wb_reg_file;
-    assign wb_rd = alu_rd;
+    assign wb_rd = pipeline_flush ? 0 : alu_rd;
 
 endmodule

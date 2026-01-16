@@ -1,6 +1,6 @@
 module pc_jump(
     input [31:0] pc,
-    input [31:0] immediate,
+    input signed [31:0] immediate,
     input [31:0] op1,
     input [6:0] opcode,
     input [2:0] func3,
@@ -13,7 +13,7 @@ module pc_jump(
     output modify_pc,
     output update_btb
 );
-    wire [31:0] input_a, input_b;
+    wire signed [31:0] input_a; 
     wire jump_inst, branch_inst;
     wire jalr_inst;
     wire branch_taken;
@@ -47,7 +47,7 @@ module pc_jump(
     assign modify_pc = jump_en ^ predictedTaken;
     
     assign input_a = jalr_inst ? op1 : pc;
-    assign adder_out = input_a + immediate;
+    assign adder_out = $signed(input_a) + $signed(immediate);
     assign jump_addr = jalr_inst ? (adder_out & 32'hFFFFFFFE) : adder_out;
 
     assign pc_inc = pc + 32'h4;

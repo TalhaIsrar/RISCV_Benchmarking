@@ -39,8 +39,6 @@ TEST_FUNC_NAME:				\
 	jal uart_putchar;		\
 	addi a0, zero, 'k';		\
 	jal uart_putchar;		\
-	addi a0, zero, '\r';	\
-	jal uart_putchar;		\
 	addi a0, zero, '\n';	\
 	jal uart_putchar;		\
 	lw ra, (sp);			\
@@ -59,8 +57,6 @@ TEST_FUNC_NAME:				\
 	addi a0, zero, 'o';		\
     jal uart_putchar;		\
 	addi a0, zero, 'r';		\
-	jal uart_putchar;		\
-	addi a0, zero, '\r';	\
 	jal uart_putchar;		\
 	addi a0, zero, '\n';	\
 	jal uart_putchar;		\
