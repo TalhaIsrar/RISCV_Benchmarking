@@ -19,7 +19,9 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdint.h>
-#define DHRY_ITERS 500    // Change: 500 instead of 2000
+#ifndef DHRY_ITERS
+#define DHRY_ITERS 2000
+#endif
 
 /* Global Variables: */
 
@@ -383,7 +385,9 @@ main()
     uart_puts("Total Cycles:              ");
     uart_puthex(User_Cycles);
     uart_putc('\n');
-
+    uart_puts("Iterations  :              ");
+    uart_putint(DHRY_ITERS);
+    uart_putc('\n');
     // uart_puts("CPI:                       ");
     // uart_putint(__divsi3(cpi_times_1000, 1000)); // integer part
     // uart_putc('.');

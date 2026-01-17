@@ -19,14 +19,14 @@ module data_memory (
         $readmemh("data.mem",mem);
     end
 
-    wire [15:0] word_write_addr = write_addr[15:0];
-    wire [15:0] word_read_addr  = read_addr[15:0];
+    wire [15:0] word_write_addr = write_addr[17:2];
+    wire [15:0] word_read_addr  = read_addr[17:2];
 
 
     // Implement a single, synchronous read operation.
     // This is the core of BRAM inference.
     always @(posedge clk) begin
-        read_data <= mem[read_addr[15:0]];
+        read_data <= mem[word_read_addr];
     end
 
     // Implement synchronous write with byte-enables.

@@ -3,7 +3,7 @@
 
 _start:
     li sp, 0x1000FFFC
-    li t0,0xEADD0000
+    li t0,0xDEAD0000
     call main
 
 HALT:

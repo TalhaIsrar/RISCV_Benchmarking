@@ -32,8 +32,8 @@ VERILOG_INCLUDE := $(shell find $(PWD)/rtl -type d -printf '-I%p ')
 # Use .fst format (fast)
 # Enable timing
 # Use 8 threads
-EXTRA_ARGS += --trace --trace-structs --trace-fst --timing -j 8 # DEBUGGING
-# EXTRA_ARGS += -j 8
+# EXTRA_ARGS += --trace --trace-structs --trace-fst --timing -j 8 # DEBUGGING
+EXTRA_ARGS += -j 8
 
 
 # Connects cocotb test.py -> TB in verilog
@@ -90,7 +90,7 @@ code.mem: code.bin rv32i_test.dump
 
 # produce one byte per line (2 hex digits) - suggests data memory is byte-addressable
 data.mem: data.bin
-		hexdump -v -e '1/1 "%02x\n"' data.bin > data.mem
+		hexdump -v -e '1/4 "%08x\n"' data.bin > data.mem
 
 # Cocotb's makefile calls verilator and runs Python against the build simulation
 sim: code.mem data.mem

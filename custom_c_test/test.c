@@ -1,4 +1,18 @@
+void uart_putc(char c) // Write single character
+{
+    // volatile pointer so compiler does not optimze away memory access
+    volatile char *uart_tx = (char *)0xFFFFFFFC; //UART Mapped at this address
+    *uart_tx = c;
+}
 
+// Writes null terminated string to UART
+void uart_puts(const char *str)
+{
+    while (*str)
+    {
+        uart_putc(*str++);
+    }
+}
 __attribute__((noinline))
 int fib_debug(int n)
 {
@@ -12,6 +26,8 @@ int fib_debug(int n)
 
 int main(void)
 {
+    uart_puts("Start\n");
     int a = fib_debug(4);
+    uart_puts("End\n");
     return a;
 }

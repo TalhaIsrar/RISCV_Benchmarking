@@ -41,7 +41,21 @@ module decode_controller (
     assign invalid_inst = !(r_type_inst || ex_alu_src ||
                             b_type_inst || j_type_inst);
 
-    assign mem_store_type = 2'b11;
-    assign mem_load_type = func3;
+    always @(*) begin
+        mem_store_type = 2'b11; // Disable writing
+        if (mem_write) begin
+            case (func3)
+                3'b000: mem_store_type = 2'b00;
+                3'b001: mem_store_type = 2'b01;
+                3'b010: mem_store_type = 2'b10;
+                default:mem_store_type = 2'b11; // Disable writing
+            endcase
+        end
+    end
+
+    always @(*) begin
+        mem_load_type = func3; // Load full value
+
+    end
 
 endmodule
