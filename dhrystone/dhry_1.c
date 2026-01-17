@@ -125,6 +125,14 @@ void uart_putsh(const char *str, int val)
   uart_puthex(val);
 }
 
+uint32_t barebones_clock()
+{
+    volatile unsigned int* hardwareCounterAddr = (unsigned int*)0xFFFFFF00;  // Address of the counter
+    unsigned int hardwareCounter; 
+    hardwareCounter = *hardwareCounterAddr;
+    return hardwareCounter;
+}
+
 main()
 /*****/
 
@@ -192,15 +200,9 @@ main()
   /***************/
   /* Start timer */
   /***************/
-  uint32_t wrongBranches0, controlXfer0, timer0, wrongBranches1, controlXfer1, N_instructions0, N_instructions1, timer1, User_Cycles;
+  uint32_t start_time, end_time, User_Cycles;
   // introduces reads of RISC-V CSRs instead of OS-based timing before start
-#ifdef TIMES
-  asm volatile("csrr %0, 0x80" : "=r"(wrongBranches0));
-  asm volatile("csrr %0, 0x81" : "=r"(controlXfer0));
-  asm volatile("csrr %0, 0x82" : "=r"(N_instructions0));
-  asm volatile("csrr %0, 0x83" : "=r"(timer0));
-
-#endif
+  start_time = barebones_clock();
 
   for (Run_Index = 1; Run_Index <= Number_Of_Runs; ++Run_Index)
   {
@@ -253,12 +255,8 @@ main()
   /**************/
 
   // Change: introduces reads of RISC-V CSRs at the end
-  asm volatile("csrr %0, 0x80" : "=r"(wrongBranches1));
-  asm volatile("csrr %0, 0x81" : "=r"(controlXfer1));
-  asm volatile("csrr %0, 0x82" : "=r"(N_instructions1));
-  asm volatile("csrr %0, 0x83" : "=r"(timer1));
-  User_Cycles = timer1 - timer0;
-
+  end_time = barebones_clock();
+  User_Cycles = end_time -start_time;
 #ifdef TIMES
   // User_Cycles = read_timer();
 #endif
@@ -372,10 +370,6 @@ main()
   }
   else
   {
-    uint32_t wrongBranches = wrongBranches1 - wrongBranches0;
-    uint32_t controlXfers = controlXfer1 - controlXfer0;
-    uint32_t instructions = N_instructions1 - N_instructions0;
-
     // When M-ext
     //  // CPI * 1000 (fixed point, 3 decimal places)
     //  uint32_t cpi_times_1000 = __divsi3(__mulsi3(User_Cycles, 1000), instructions);
@@ -388,15 +382,6 @@ main()
     // Print table
     uart_puts("Total Cycles:              ");
     uart_puthex(User_Cycles);
-    uart_putc('\n');
-    uart_puts("Number of Control Xfers:   ");
-    uart_puthex(controlXfers);
-    uart_putc('\n');
-    uart_puts("Number of Instructions:    ");
-    uart_puthex(instructions);
-    uart_putc('\n');
-    uart_puts("Wrong Branches:            ");
-    uart_puthex(wrongBranches);
     uart_putc('\n');
 
     // uart_puts("CPI:                       ");

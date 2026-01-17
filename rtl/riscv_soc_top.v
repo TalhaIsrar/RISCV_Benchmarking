@@ -100,8 +100,8 @@ module riscv_soc_top(
         .pc_jump_addr(ex_if_pc_jump_addr),
         .jump_en(ex_if_jump_en),
         .btb_target_pc(btb_target_pc),
-        .btb_pc_valid(0), // Replace this by 1'b0 to disconnect BTB
-        .btb_pc_predictTaken(0), // Replace this by 1'b0 to disconnect BTB
+        .btb_pc_valid(btb_pc_valid),
+        .btb_pc_predictTaken(btb_pc_predictTaken),
         .instruction(if_instruction),
         .pc(if_pc)
     );
@@ -112,8 +112,8 @@ module riscv_soc_top(
         .rst(rst),
         .pc(if_pc),
         .update_pc(ex_pc),
-        .update(0), // Replace this by 1'b0 to disconnect BTB otherwise keep btb_update
-        .update_target(btb_update_target),
+        .update(0), // Replace btb_update by 1'b0 to disconnect BTB
+        .update_target(0), // Replace btb_update_target by 1'b0 to disconnect BTB
         .mispredicted(ex_if_jump_en),
         .target_pc(btb_target_pc),
         .valid(btb_pc_valid),
@@ -129,7 +129,7 @@ module riscv_soc_top(
         .if_flush(if_id_pipeline_flush),
         .if_pc(if_pc),
         .if_instruction(if_instruction),
-        .if_pred_taken(btb_pc_predictTaken),
+        .if_pred_taken(btb_pc_predictTaken && btb_pc_valid),
         .id_flush(id_flush),
         .id_pc(id_pc),
         .id_instruction(id_instruction),
